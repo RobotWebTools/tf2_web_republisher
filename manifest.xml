@@ -1,0 +1,24 @@
+<package>
+  <description brief="tf2_web_republisher">
+
+     tf2_web_republisher
+
+  </description>
+  <author>Julius Kammerl</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/tf2_web_republisher</url>
+
+  <rosdep name="boost" />
+  
+  <depend package="tf"/>
+  <depend package="tf2"/>
+  <depend package="tf2_ros"/>
+  <depend package="tf2_msgs"/>
+  <depend package="tf2_geometry_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="actionlib"/> 
+  <depend package="actionlib_msgs"/> 
+</package>
+
+
