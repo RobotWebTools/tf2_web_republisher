@@ -51,73 +51,132 @@
 
 class TFRepublisher
 {
+protected:
+
+  typedef actionlib::ActionServer<tf2_web_republisher::TFSubscriptionAction> TFTransformServer;
+  typedef TFTransformServer::GoalHandle GoalHandle;
+
+  ros::NodeHandle nh_;
+
+  TFTransformServer as_;
+  struct GoalInfo
+  {
+    GoalHandle handle;
+    std::vector<TFPair> tf_subscriptions_;
+  };
+
+  std::list<boost::shared_ptr<GoalInfo> > active_goals_;
+  boost::mutex mutex_;
+
+  ros::Timer republish_timer_;
+
+  tf2::Buffer tf_buffer_;
+  tf2::TransformListener tf_listener_;
+
 public:
 
   TFRepublisher(const std::string& name) :
-      as_(nh_, name, boost::bind(&TFRepublisher::TFsubscribe, this, _1), false),
+      nh_(), as_(ros::NodeHandle(),
+                 name,
+                 boost::bind(&TFRepublisher::goalCB, this, _1),
+                 boost::bind(&TFRepublisher::cancelCB, this, _1),
+                 false),
       tf_listener_(tf_buffer_)
   {
+    // start action server
     as_.start();
 
-    std::string pub_topic;
-    nh_.param<std::string>("publish_topic", pub_topic, "/tf_web");
-    pub_ = nh_.advertise<tf::tfMessage>(pub_topic, 1);
-
+    // read update rate from parameter server
     double rate;
     nh_.param<double>("rate", rate, 10.0);
-    republish_timer_ = nh_.createTimer(ros::Duration(1.0 / rate), boost::bind(&TFRepublisher::republish, this));
+    republish_timer_ = nh_.createTimer(ros::Duration(1.0 / rate), boost::bind(&TFRepublisher::processActiveGoals, this));
   }
 
   ~TFRepublisher() {}
 
-
-  void TFsubscribe(const tf2_web_republisher::TFSubscriptionGoalConstPtr &goal)
+  void cancelCB(GoalHandle& gh)
   {
+    boost::mutex::scoped_lock l(mutex_);
 
-    TFPairPtr tf_pair = TFPairPtr(new TFPair());
-
-    tf_pair->setSourceFrame(goal->source_frame);
-    tf_pair->setTargetFrame(goal->target_frame);
-    tf_pair->setAngularThres(goal->angular_thres);
-    tf_pair->setTransThres(goal->trans_thres);
-
+    // search for goal handle and remove it from active_goals_ list
+    for(std::list<boost::shared_ptr<GoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end();)
     {
-      boost::mutex::scoped_lock lock (mutex_);
-      tf_subscriptions_[tf_pair->getID()]=tf_pair;
+      GoalInfo& info = **it;
+      if(info.handle == gh)
+      {
+        it = active_goals_.erase(it);
+        info.handle.setCanceled();
+
+        ROS_INFO_STREAM("GoalHandle canceled ");
+
+        return;
+      }
+      else
+        ++it;
     }
-
-    ROS_DEBUG_STREAM("Action received: "<<tf_pair->getID());
-
-    as_.setSucceeded(action_result_);
-
   }
 
-  void republish()
+  void goalCB(GoalHandle& gh)
   {
-    while (nh_.ok())
+    // accept new goals
+    gh.setAccepted();
+
+    // get goal from handle
+    const tf2_web_republisher::TFSubscriptionGoal::ConstPtr& goal = gh.getGoal();
+
+    // generate goal_info struct
+    boost::shared_ptr<GoalInfo> goal_info = boost::make_shared<GoalInfo>();
+    goal_info->handle = gh;
+
+    std::size_t request_size_ = goal->source_frames.size();
+    goal_info->tf_subscriptions_.resize(request_size_);
+
+    for (std::size_t i=0; i<request_size_; ++i )
     {
+
+      TFPair& tf_pair = goal_info->tf_subscriptions_[i];
+
+      tf_pair.setSourceFrame(goal->source_frames[i]);
+      tf_pair.setTargetFrame(goal->target_frame);
+      tf_pair.setAngularThres(goal->angular_thres);
+      tf_pair.setTransThres(goal->trans_thres);
+    }
+
+    {
+      boost::mutex::scoped_lock l(mutex_);
+      // add new goal to list of active goals/clients
+      active_goals_.push_back(goal_info);
+    }
+  }
+
+  void processActiveGoals()
+  {
+    for (std::list<boost::shared_ptr<GoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end(); ++it)
+    {
+      tf2_web_republisher::TFSubscriptionFeedback feedback;
+
+      GoalInfo& info = **it;
+
       {
         boost::mutex::scoped_lock lock (mutex_);
 
-        tf::tfMessage msg;
-
         // iterate over tf_subscription map
-        std::map<std::string, TFPairPtr>::iterator it;
-        std::map<std::string, TFPairPtr>::const_iterator end = tf_subscriptions_.end();
+        std::vector<TFPair>::iterator it ;
+        std::vector<TFPair>::const_iterator end = info.tf_subscriptions_.end();
 
-        for (it=tf_subscriptions_.begin(); it!=end; ++it)
+        for (it=info.tf_subscriptions_.begin(); it!=end; ++it)
         {
-          TFPairPtr tf_pair = it->second;
+          geometry_msgs::TransformStamped transform;
 
-          geometry_msgs::TransformStampedPtr transform;
           try
           {
             // lookup transformation for tf_pair
-            *transform = tf_buffer_.lookupTransform(tf_pair->getSourceFrame(),
-                                                    tf_pair->getTargetFrame(),
-                                                    ros::Time(0));
+            transform = tf_buffer_.lookupTransform(it->getTargetFrame(),
+                                                   it->getSourceFrame(),
+                                                   ros::Time(0));
+
             // update tf_pair with transformtion
-            tf_pair->setTransform(transform);
+            it->updateTransform(transform);
           }
           catch (tf2::TransformException ex)
           {
@@ -125,45 +184,29 @@ public:
           }
 
           // check angular and translational thresholds
-          if (tf_pair->updateNeeded())
+          if (it->updateNeeded())
           {
-            // add transformation to tf output message
-            const geometry_msgs::TransformStampedConstPtr stamped_msg = transform;
-            if (stamped_msg)
-            {
-              msg.transforms.push_back(*stamped_msg);
-              // setting time & frame information
-              msg.transforms.back().header.stamp = ros::Time::now();
-              msg.transforms.back().header.frame_id = tf_pair->getSourceFrame();
-              msg.transforms.back().child_frame_id = tf_pair->getTargetFrame();
-            }
+            transform.header.stamp = ros::Time::now();
+            transform.header.frame_id = it->getTargetFrame();
+            transform.child_frame_id = it->getSourceFrame();
 
+            // notify tf_subscription that a network transmission has been triggered
+            it->transmissionTriggered();
+
+            // add transform to the feedback
+            feedback.transforms.push_back(transform);
           }
         }
-        if (msg.transforms.size()>0)
-          pub_.publish(msg);
       }
+
+      if (feedback.transforms.size() > 0)
+      {
+        // publish feedback
+        info.handle.publishFeedback(feedback);
+      }
+
     }
   }
-
-protected:
-
-  ros::NodeHandle nh_;
-  ros::Publisher pub_;
-
-  actionlib::SimpleActionServer<tf2_web_republisher::TFSubscriptionAction> as_;
-  tf2_web_republisher::TFSubscriptionActionFeedback action_feedback_;
-  tf2_web_republisher::TFSubscriptionResult action_result_;
-
-  boost::mutex mutex_;
-  ros::Timer republish_timer_;
-
-  tf2::Buffer tf_buffer_;
-  tf2::TransformListener tf_listener_;
-
-  std::map<std::string, TFPairPtr> tf_subscriptions_;
-
-  std::string base_frame_;
 
 };
 

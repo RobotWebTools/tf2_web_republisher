@@ -44,21 +44,70 @@
 #include <tf/transform_datatypes.h>
 #include <geometry_msgs/TransformStamped.h>
 
-#include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
 #include <tf2_web_republisher/TFSubscriptionAction.h>
 
 class TestSubscription
 {
 public:
 
-  TestSubscription(const std::string& name)
+  TestSubscription(const std::string& name) :
+    ac_("tf2_web_republisher", true)
   {
     std::string sub_topic;
     nh_.param<std::string>("tf_topic", sub_topic, "/tf_web");
     sub_ = nh_.subscribe(sub_topic, 1, &TestSubscription::callbackTF, this);
+
+    ROS_INFO("Waiting for action server to start.");
+    // wait for the action server to start
+    ac_.waitForServer(); //will wait for infinite time
+
+    ROS_INFO("Action server started, sending goal.");
+    // send a goal to the action
+    tf2_web_republisher::TFSubscriptionGoal goal;
+    goal.source_frames.resize(1);
+    goal.source_frames[0] = "odom_combined";
+    goal.target_frame = "head_mount_kinect_rgb_link";
+    goal.angular_thres = 0.0f;
+    goal.trans_thres = 0.0f;
+
+    ac_.sendGoal(goal, boost::bind(&TestSubscription::doneCb, this, _1, _2), boost::bind(&TestSubscription::activeCb, this), boost::bind(&TestSubscription::feedbackCb, this, _1));
+
+    //wait for the action to return
+    bool finished_before_timeout = ac_.waitForResult(ros::Duration(10.0));
+
+    if (finished_before_timeout)
+    {
+      actionlib::SimpleClientGoalState state = ac_.getState();
+      ROS_INFO("Action finished: %s", state.toString().c_str());
+    }
+    else
+      ROS_INFO("Action did not finish before the time out.");
   }
 
   ~TestSubscription() {}
+
+  // Called once when the goal completes
+  void doneCb(const actionlib::SimpleClientGoalState& state,
+              const tf2_web_republisher::TFSubscriptionResultConstPtr& result)
+  {
+    ROS_INFO("Finished in state [%s]", state.toString().c_str());
+    //ROS_INFO("Answer: %i", result->sequence.back());
+    ros::shutdown();
+  }
+
+  // Called once when the goal becomes active
+  void activeCb()
+  {
+    ROS_INFO("Goal just went active");
+  }
+
+  // Called every time feedback is received for the goal
+  void feedbackCb(const tf2_web_republisher::TFSubscriptionFeedbackConstPtr& feedback)
+  {
+    ROS_INFO("Got Feedback of length %lu", feedback->transforms.size());
+  }
 
   void callbackTF(const tf::tfMessageConstPtr &msg)
   {
@@ -81,10 +130,7 @@ protected:
   ros::NodeHandle nh_;
   ros::Subscriber sub_;
 
-  //actionlib::SimpleActionServer<tf2_web_republisher::TFSubscriptionAction> as_;
-  tf2_web_republisher::TFSubscriptionActionFeedback action_feedback_;
-  tf2_web_republisher::TFSubscriptionResult action_result_;
-
+  actionlib::SimpleActionClient<tf2_web_republisher::TFSubscriptionAction> ac_;
 };
 
 int main(int argc, char **argv)

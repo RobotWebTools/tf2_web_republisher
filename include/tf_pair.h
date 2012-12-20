@@ -108,15 +108,15 @@ public:
     return trans_thres_;
   }
 
-  void setTransform(geometry_msgs::TransformStampedConstPtr update)
+  void updateTransform(geometry_msgs::TransformStamped& update)
   {
-    tf_received_ = update;
+    tf::transformMsgToTF(update.transform, tf_received_);
     updated_ = true;
   }
 
-  geometry_msgs::TransformStampedConstPtr getTransform() const
+  void transmissionTriggered()
   {
-    return tf_received_;
+    tf_transmitted_ = tf_received_;
   }
 
   bool updateNeeded()
@@ -125,13 +125,9 @@ public:
 
     if (updated_)
     {
-      tf::Transform tf1, tf2;
-      tf::transformMsgToTF(tf_transmitted_->transform, tf1);
-      tf::transformMsgToTF(tf_received_->transform, tf2);
-
-      if (trans_thres_ == 0.0 || angular_thres_ == 0.0
-          || tf1.getOrigin().distance(tf2.getOrigin()) > trans_thres_
-          || tf1.getRotation().angle(tf2.getRotation()) > angular_thres_)
+       if (trans_thres_ == 0.0 || angular_thres_ == 0.0
+          || tf_transmitted_.getOrigin().distance(tf_received_.getOrigin()) > trans_thres_
+          || tf_transmitted_.getRotation().angle(tf_received_.getRotation()) > angular_thres_)
         result = true;
     }
 
@@ -153,8 +149,8 @@ private:
   float angular_thres_;
   float trans_thres_;
 
-  geometry_msgs::TransformStampedConstPtr tf_transmitted_;
-  geometry_msgs::TransformStampedConstPtr tf_received_;
+  tf::Transform tf_transmitted_;
+  tf::Transform tf_received_;
 
   bool updated_;
 
