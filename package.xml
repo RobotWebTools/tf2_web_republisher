@@ -1,0 +1,28 @@
+<package>
+  <name>tf2_web_republisher</name>
+  <version>0.0.1</version>
+  <description>
+    This package republishes throttled and quantized tf messages to be transmitted to a ros-bridge web-client
+  </description>
+  <author email="jkammerl@willowgarage.com">Julius Kammer</author>
+  <maintainer email="jkammerl@willowgarage.com">Julius Kammerl</maintainer>
+  <license>BSD</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>tf</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>rostime</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+
+  <run_depend>tf</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>rostime</run_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+
+</package>
+

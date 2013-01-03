@@ -1,42 +1,28 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(tf2_web_republisher)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Debug)
+find_package(catkin REQUIRED COMPONENTS tf tf2_ros geometry_msgs actionlib actionlib_msgs)
+find_package(Boost COMPONENTS thread REQUIRED)
 
-rosbuild_find_ros_package(actionlib_msgs)
-include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake
-        ${actionlib_msgs_PACKAGE_PATH}/msg_gen/cpp/include
-        )
-genaction()
+add_action_files(DIRECTORY action FILES TFSubscription.action)
+generate_messages(
+  DEPENDENCIES actionlib_msgs std_msgs geometry_msgs
+)
 
-rosbuild_init()
-
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
 
 include_directories(/include)
+include_directories(${catkin_INCLUDE_DIRS})
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/tf_web_republisher.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-rosbuild_add_executable(${PROJECT_NAME} src/tf_web_republisher.cpp)
-rosbuild_link_boost(${PROJECT_NAME} thread)
+add_executable(${PROJECT_NAME} src/tf_web_republisher.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME} actionlib_gencpp)
 
-rosbuild_add_executable(test_subscription src/test_subscription.cpp)
-rosbuild_link_boost(test_subscription thread)
+add_executable(${PROJECT_NAME}_test_subscription src/test_subscription.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME} actionlib_gencpp)
+
+catkin_package(
+    CATKIN_DEPENDS tf tf2_ros geometry_msgs actionlib actionlib_msgs
+)
+
 
