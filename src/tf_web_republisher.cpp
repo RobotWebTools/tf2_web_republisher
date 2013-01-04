@@ -116,6 +116,14 @@ public:
     }
   }
 
+  std::string cleanTfFrame( const std::string frame_id )
+  {
+    if ( frame_id[0] == '/' ) {
+      return frame_id.substr(1);
+    }
+    return frame_id;
+  }
+
   void goalCB(GoalHandle& gh)
   {
     // accept new goals
@@ -133,11 +141,13 @@ public:
 
     for (std::size_t i=0; i<request_size_; ++i )
     {
-
       TFPair& tf_pair = goal_info->tf_subscriptions_[i];
 
-      tf_pair.setSourceFrame(goal->source_frames[i]);
-      tf_pair.setTargetFrame(goal->target_frame);
+      std::string source_frame = cleanTfFrame(goal->source_frames[i]);
+      std::string target_frame = cleanTfFrame(goal->target_frame);
+
+      tf_pair.setSourceFrame(source_frame);
+      tf_pair.setTargetFrame(target_frame);
       tf_pair.setAngularThres(goal->angular_thres);
       tf_pair.setTransThres(goal->trans_thres);
     }
