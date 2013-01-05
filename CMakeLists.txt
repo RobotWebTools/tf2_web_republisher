@@ -20,7 +20,11 @@ add_executable(${PROJECT_NAME} src/tf_web_republisher.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp)
 
-add_executable(${PROJECT_NAME}_test_subscription src/test_subscription.cpp)
+add_executable(${PROJECT_NAME}_test_subscription tests/test_subscription.cpp)
+target_link_libraries(${PROJECT_NAME}_test_subscription ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME}_test_subscription ${PROJECT_NAME}_gencpp)
+
+add_executable(${PROJECT_NAME}_test_subscription tests/test_subscription2.cpp)
 target_link_libraries(${PROJECT_NAME}_test_subscription ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
 add_dependencies(${PROJECT_NAME}_test_subscription ${PROJECT_NAME}_gencpp)
 
