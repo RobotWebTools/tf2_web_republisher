@@ -37,6 +37,7 @@ rosbuild_add_boost_directories()
 rosbuild_add_executable(${PROJECT_NAME} src/tf_web_republisher.cpp)
 rosbuild_link_boost(${PROJECT_NAME} thread)
 
-rosbuild_add_executable(test_subscription src/test_subscription.cpp)
+rosbuild_add_executable(test_subscription tests/test_subscription.cpp)
 rosbuild_link_boost(test_subscription thread)
-
+rosbuild_add_executable(test_subscription2 tests/test_subscription2.cpp)
+rosbuild_link_boost(test_subscription2 thread)
