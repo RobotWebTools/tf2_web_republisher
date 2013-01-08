@@ -18,10 +18,25 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} src/tf_web_republisher.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
-add_dependencies(${PROJECT_NAME} actionlib_gencpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp)
 
-add_executable(${PROJECT_NAME}_test_subscription src/test_subscription.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
-add_dependencies(${PROJECT_NAME} actionlib_gencpp)
+add_executable(${PROJECT_NAME}_test_subscription tests/test_subscription.cpp)
+target_link_libraries(${PROJECT_NAME}_test_subscription ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME}_test_subscription ${PROJECT_NAME}_gencpp)
+
+<<<<<<< HEAD
+=======
+add_executable(${PROJECT_NAME}_test_subscription2 tests/test_subscription2.cpp)
+target_link_libraries(${PROJECT_NAME}_test_subscription2 ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME}_test_subscription2 ${PROJECT_NAME}_gencpp)
+
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+>>>>>>> b9365351d4e85cd0bced4c3b807c23cabf92d69a
 
 

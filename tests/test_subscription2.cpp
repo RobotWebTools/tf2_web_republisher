@@ -67,10 +67,11 @@ public:
     // send a goal to the action
     tf2_web_republisher::TFSubscriptionGoal goal;
     goal.source_frames.resize(1);
-    goal.source_frames[0] = "odom_combined";
-    goal.target_frame = "head_mount_kinect_rgb_link";
+    goal.source_frames[0] = "base";
+    goal.target_frame = "target";
     goal.angular_thres = 0.0f;
     goal.trans_thres = 0.0f;
+    goal.rate = 1;
 
     ac_.sendGoal(goal, boost::bind(&TestSubscription::doneCb, this, _1, _2), boost::bind(&TestSubscription::activeCb, this), boost::bind(&TestSubscription::feedbackCb, this, _1));
 
@@ -135,7 +136,7 @@ protected:
 
 int main(int argc, char **argv)
 {
-ros::init(argc, argv, "tf2_test_web_republisher");
+ros::init(argc, argv, "tf2_test_web_republisher2");
 
 TestSubscription tf2_test_republisher(ros::this_node::getName());
 ros::spin();

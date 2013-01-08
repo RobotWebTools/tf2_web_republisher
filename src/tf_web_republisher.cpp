@@ -59,20 +59,23 @@ protected:
   ros::NodeHandle nh_;
 
   TFTransformServer as_;
-  struct GoalInfo
+
+  // struct that manages client goals
+  struct ClientGoalInfo
   {
     GoalHandle handle;
     std::vector<TFPair> tf_subscriptions_;
     unsigned int client_ID_;
+    ros::Timer  timer_;
   };
 
-  std::list<boost::shared_ptr<GoalInfo> > active_goals_;
-  boost::mutex mutex_;
+  std::list<boost::shared_ptr<ClientGoalInfo> > active_goals_;
+  boost::mutex goals_mutex_;
 
-  ros::Timer republish_timer_;
-
+  // tf2 buffer and transformer
   tf2::Buffer tf_buffer_;
   tf2::TransformListener tf_listener_;
+  boost::mutex tf_buffer_mutex_;
 
   unsigned int client_ID_count_;
 
@@ -88,35 +91,37 @@ public:
   {
     // start action server
     as_.start();
-
-    // read update rate from parameter server
-    double rate;
-    nh_.param<double>("rate", rate, 10.0);
-    republish_timer_ = nh_.createTimer(ros::Duration(1.0 / rate), boost::bind(&TFRepublisher::processActiveGoals, this));
   }
 
   ~TFRepublisher() {}
 
   void cancelCB(GoalHandle& gh)
   {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(goals_mutex_);
 
     ROS_DEBUG("GoalHandle canceled");
 
     // search for goal handle and remove it from active_goals_ list
-    for(std::list<boost::shared_ptr<GoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end();)
+    for(std::list<boost::shared_ptr<ClientGoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end();)
     {
-      GoalInfo& info = **it;
+      ClientGoalInfo& info = **it;
       if(info.handle == gh)
       {
         it = active_goals_.erase(it);
         info.handle.setCanceled();
-
         return;
       }
       else
         ++it;
     }
+  }
+
+  const std::string cleanTfFrame( const std::string frame_id ) const
+  {
+    if ( frame_id[0] == '/' ) {
+      return frame_id.substr(1);
+    }
+    return frame_id;
   }
 
   void goalCB(GoalHandle& gh)
@@ -130,52 +135,54 @@ public:
     const tf2_web_republisher::TFSubscriptionGoal::ConstPtr& goal = gh.getGoal();
 
     // generate goal_info struct
-    boost::shared_ptr<GoalInfo> goal_info = boost::make_shared<GoalInfo>();
+    boost::shared_ptr<ClientGoalInfo> goal_info = boost::make_shared<ClientGoalInfo>();
     goal_info->handle = gh;
     goal_info->client_ID_ = client_ID_count_++;
+    goal_info->timer_ = nh_.createTimer(ros::Duration(1.0 / goal->rate),
+                                        boost::bind(&TFRepublisher::processGoal, this, goal_info, _1));
 
     std::size_t request_size_ = goal->source_frames.size();
     goal_info->tf_subscriptions_.resize(request_size_);
 
     for (std::size_t i=0; i<request_size_; ++i )
     {
-
       TFPair& tf_pair = goal_info->tf_subscriptions_[i];
 
-      tf_pair.setSourceFrame(goal->source_frames[i]);
-      tf_pair.setTargetFrame(goal->target_frame);
+      std::string source_frame = cleanTfFrame(goal->source_frames[i]);
+      std::string target_frame = cleanTfFrame(goal->target_frame);
+
+      tf_pair.setSourceFrame(source_frame);
+      tf_pair.setTargetFrame(target_frame);
       tf_pair.setAngularThres(goal->angular_thres);
       tf_pair.setTransThres(goal->trans_thres);
     }
 
     {
-      boost::mutex::scoped_lock l(mutex_);
+      boost::mutex::scoped_lock l(goals_mutex_);
       // add new goal to list of active goals/clients
       active_goals_.push_back(goal_info);
     }
+
   }
 
-  void processActiveGoals()
+  void processGoal(boost::shared_ptr<ClientGoalInfo> goal_info, const ros::TimerEvent& )
   {
-    for (std::list<boost::shared_ptr<GoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end(); ++it)
-    {
       tf2_web_republisher::TFSubscriptionFeedback feedback;
 
-      GoalInfo& info = **it;
-
       {
-        boost::mutex::scoped_lock lock (mutex_);
-
         // iterate over tf_subscription map
         std::vector<TFPair>::iterator it ;
-        std::vector<TFPair>::const_iterator end = info.tf_subscriptions_.end();
+        std::vector<TFPair>::const_iterator end = goal_info->tf_subscriptions_.end();
 
-        for (it=info.tf_subscriptions_.begin(); it!=end; ++it)
+        for (it=goal_info->tf_subscriptions_.begin(); it!=end; ++it)
         {
           geometry_msgs::TransformStamped transform;
 
           try
           {
+            // protecting tf_buffer
+            boost::mutex::scoped_lock lock (tf_buffer_mutex_);
+
             // lookup transformation for tf_pair
             transform = tf_buffer_.lookupTransform(it->getTargetFrame(),
                                                    it->getSourceFrame(),
@@ -214,10 +221,7 @@ public:
       {
         ROS_DEBUG("Client %d: No TF frame update needed:", info.client_ID_);
       }
-
     }
-  }
-
 };
 
 int main(int argc, char **argv)
