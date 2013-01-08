@@ -215,11 +215,11 @@ public:
       if (feedback.transforms.size() > 0)
       {
         // publish feedback
-        info.handle.publishFeedback(feedback);
-        ROS_DEBUG("Client %d: TF feedback published:", info.client_ID_);
+        goal_info->handle.publishFeedback(feedback);
+        ROS_DEBUG("Client %d: TF feedback published:", goal_info->client_ID_);
       } else
       {
-        ROS_DEBUG("Client %d: No TF frame update needed:", info.client_ID_);
+        ROS_DEBUG("Client %d: No TF frame update needed:", goal_info->client_ID_);
       }
     }
 };
