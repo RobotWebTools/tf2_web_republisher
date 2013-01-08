@@ -63,6 +63,7 @@ protected:
   {
     GoalHandle handle;
     std::vector<TFPair> tf_subscriptions_;
+    unsigned int client_ID_;
   };
 
   std::list<boost::shared_ptr<GoalInfo> > active_goals_;
@@ -73,6 +74,8 @@ protected:
   tf2::Buffer tf_buffer_;
   tf2::TransformListener tf_listener_;
 
+  unsigned int client_ID_count_;
+
 public:
 
   TFRepublisher(const std::string& name) :
@@ -81,7 +84,7 @@ public:
                  boost::bind(&TFRepublisher::goalCB, this, _1),
                  boost::bind(&TFRepublisher::cancelCB, this, _1),
                  false),
-      tf_listener_(tf_buffer_)
+      tf_listener_(tf_buffer_), client_ID_count_(0)
   {
     // start action server
     as_.start();
@@ -98,6 +101,8 @@ public:
   {
     boost::mutex::scoped_lock l(mutex_);
 
+    ROS_DEBUG("GoalHandle canceled");
+
     // search for goal handle and remove it from active_goals_ list
     for(std::list<boost::shared_ptr<GoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end();)
     {
@@ -106,8 +111,6 @@ public:
       {
         it = active_goals_.erase(it);
         info.handle.setCanceled();
-
-        ROS_INFO_STREAM("GoalHandle canceled ");
 
         return;
       }
@@ -118,6 +121,8 @@ public:
 
   void goalCB(GoalHandle& gh)
   {
+    ROS_DEBUG("GoalHandle request received");
+
     // accept new goals
     gh.setAccepted();
 
@@ -127,6 +132,7 @@ public:
     // generate goal_info struct
     boost::shared_ptr<GoalInfo> goal_info = boost::make_shared<GoalInfo>();
     goal_info->handle = gh;
+    goal_info->client_ID_ = client_ID_count_++;
 
     std::size_t request_size_ = goal->source_frames.size();
     goal_info->tf_subscriptions_.resize(request_size_);
@@ -203,6 +209,10 @@ public:
       {
         // publish feedback
         info.handle.publishFeedback(feedback);
+        ROS_DEBUG("Client %d: TF feedback published:", info.client_ID_);
+      } else
+      {
+        ROS_DEBUG("Client %d: No TF frame update needed:", info.client_ID_);
       }
 
     }
