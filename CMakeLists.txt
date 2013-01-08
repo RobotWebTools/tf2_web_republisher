@@ -24,12 +24,12 @@ add_executable(${PROJECT_NAME}_test_subscription tests/test_subscription.cpp)
 target_link_libraries(${PROJECT_NAME}_test_subscription ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
 add_dependencies(${PROJECT_NAME}_test_subscription ${PROJECT_NAME}_gencpp)
 
-add_executable(${PROJECT_NAME}_test_subscription tests/test_subscription2.cpp)
-target_link_libraries(${PROJECT_NAME}_test_subscription ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
-add_dependencies(${PROJECT_NAME}_test_subscription ${PROJECT_NAME}_gencpp)
+add_executable(${PROJECT_NAME}_test_subscription2 tests/test_subscription2.cpp)
+target_link_libraries(${PROJECT_NAME}_test_subscription2 ${catkin_LIBRARIES} ${Boost_LIBRARIES}) 
+add_dependencies(${PROJECT_NAME}_test_subscription2 ${PROJECT_NAME}_gencpp)
 
 
-install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_test_subscription
+install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
