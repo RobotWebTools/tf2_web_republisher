@@ -1,6 +1,6 @@
 <package>
   <name>tf2_web_republisher</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>
     This package republishes throttled and quantized tf messages to be transmitted to a ros-bridge web-client
   </description>
