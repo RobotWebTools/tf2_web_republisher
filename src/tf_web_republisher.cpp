@@ -73,8 +73,8 @@ protected:
   boost::mutex goals_mutex_;
 
   // tf2 buffer and transformer
-  tf2::Buffer tf_buffer_;
-  tf2::TransformListener tf_listener_;
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
   boost::mutex tf_buffer_mutex_;
 
   unsigned int client_ID_count_;
