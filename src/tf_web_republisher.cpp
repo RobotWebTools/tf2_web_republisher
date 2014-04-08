@@ -73,8 +73,13 @@ protected:
   boost::mutex goals_mutex_;
 
   // tf2 buffer and transformer
+#if ROS_VERSION_MINOR < 10
+  tf2::Buffer tf_buffer_;
+  tf2::TransformListener tf_listener_;
+#else
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+#endif
   boost::mutex tf_buffer_mutex_;
 
   unsigned int client_ID_count_;
