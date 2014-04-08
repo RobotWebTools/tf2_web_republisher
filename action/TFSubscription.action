@@ -1,11 +1,11 @@
-#goal
+# goal
 string[] source_frames
 string target_frame
 float32 angular_thres
 float32 trans_thres
 float32 rate
 ---
-#result
+# result
 ---
-#feedback
+# feedback
 geometry_msgs/TransformStamped[] transforms
