@@ -2,6 +2,12 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.1 (2014-04-08)
+------------------
+* cleanup
+* ROS version checked for tf2 API namespace
+* Contributors: Russell Toris
+
 0.2.0 (2013-08-29)
 ------------------
 * General clean up
