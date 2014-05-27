@@ -113,6 +113,7 @@ public:
       if(info.handle == gh)
       {
         it = active_goals_.erase(it);
+        info.timer_.stop();
         info.handle.setCanceled();
         return;
       }
