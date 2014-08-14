@@ -44,7 +44,7 @@ class TFPair
 public:
 
   TFPair() :
-      angular_thres_(0.0f), trans_thres_(0.0f), updated_(false)
+       angular_thres_(0.0f), trans_thres_(0.0f), updated_(false), first_transmission_(true)
   {
   }
 
@@ -56,7 +56,8 @@ public:
       target_frame_(target_frame),
       angular_thres_(angular_thres),
       trans_thres_(trans_thres),
-      updated_(false)
+      updated_(false),
+      first_transmission_(true)
   {
   }
 
@@ -125,10 +126,14 @@ public:
 
     if (updated_)
     {
-       if (trans_thres_ == 0.0 || angular_thres_ == 0.0
+      if (trans_thres_ == 0.0 || angular_thres_ == 0.0
           || tf_transmitted_.getOrigin().distance(tf_received_.getOrigin()) > trans_thres_
-          || tf_transmitted_.getRotation().angle(tf_received_.getRotation()) > angular_thres_)
+          || tf_transmitted_.getRotation().angle(tf_received_.getRotation()) > angular_thres_
+          || first_transmission_)
+      {
         result = true;
+        first_transmission_ = false;
+      }       
     }
 
     updated_ = false;
@@ -153,6 +158,7 @@ private:
   tf::Transform tf_received_;
 
   bool updated_;
+  bool first_transmission_;
 
 };
 
