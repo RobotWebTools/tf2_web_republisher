@@ -2,6 +2,18 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.2 (2014-08-15)
+------------------
+* release prepare
+* Merge pull request #14 from T045T/send_initial_transformation
+  make sure at least one transformation is sent
+* make sure at least one transformation is sent, even if the tf is (and stays) the identity
+* Merge pull request #13 from T045T/develop
+  stop sending TF updates when removing a cancelled goal
+* stop sending TF updates when removing a cancelled goal
+* URLs added to package XML
+* Contributors: Nils Berg, Russell Toris
+
 0.2.1 (2014-04-08)
 ------------------
 * cleanup
