@@ -87,12 +87,13 @@ protected:
 public:
 
   TFRepublisher(const std::string& name) :
-      nh_(), as_(ros::NodeHandle(),
-                 name,
-                 boost::bind(&TFRepublisher::goalCB, this, _1),
-                 boost::bind(&TFRepublisher::cancelCB, this, _1),
-                 false),
-      tf_listener_(tf_buffer_), client_ID_count_(0)
+    nh_(),
+    as_(ros::NodeHandle(),
+        name,
+        boost::bind(&TFRepublisher::goalCB, this, _1),
+        boost::bind(&TFRepublisher::cancelCB, this, _1),
+        false),
+    tf_listener_(tf_buffer_), client_ID_count_(0)
   {
     // start action server
     as_.start();
@@ -124,7 +125,8 @@ public:
 
   const std::string cleanTfFrame( const std::string frame_id ) const
   {
-    if ( frame_id[0] == '/' ) {
+    if ( frame_id[0] == '/' )
+    {
       return frame_id.substr(1);
     }
     return frame_id;
@@ -173,69 +175,70 @@ public:
 
   void processGoal(boost::shared_ptr<ClientGoalInfo> goal_info, const ros::TimerEvent& )
   {
-      tf2_web_republisher::TFSubscriptionFeedback feedback;
+    tf2_web_republisher::TFSubscriptionFeedback feedback;
 
+    {
+      // iterate over tf_subscription map
+      std::vector<TFPair>::iterator it ;
+      std::vector<TFPair>::const_iterator end = goal_info->tf_subscriptions_.end();
+
+      for (it=goal_info->tf_subscriptions_.begin(); it!=end; ++it)
       {
-        // iterate over tf_subscription map
-        std::vector<TFPair>::iterator it ;
-        std::vector<TFPair>::const_iterator end = goal_info->tf_subscriptions_.end();
+        geometry_msgs::TransformStamped transform;
 
-        for (it=goal_info->tf_subscriptions_.begin(); it!=end; ++it)
+        try
         {
-          geometry_msgs::TransformStamped transform;
+          // protecting tf_buffer
+          boost::mutex::scoped_lock lock (tf_buffer_mutex_);
 
-          try
-          {
-            // protecting tf_buffer
-            boost::mutex::scoped_lock lock (tf_buffer_mutex_);
+          // lookup transformation for tf_pair
+          transform = tf_buffer_.lookupTransform(it->getTargetFrame(),
+                                                 it->getSourceFrame(),
+                                                 ros::Time(0));
 
-            // lookup transformation for tf_pair
-            transform = tf_buffer_.lookupTransform(it->getTargetFrame(),
-                                                   it->getSourceFrame(),
-                                                   ros::Time(0));
+          // update tf_pair with transformtion
+          it->updateTransform(transform);
+        }
+        catch (tf2::TransformException ex)
+        {
+          ROS_ERROR("%s", ex.what());
+        }
 
-            // update tf_pair with transformtion
-            it->updateTransform(transform);
-          }
-          catch (tf2::TransformException ex)
-          {
-            ROS_ERROR("%s", ex.what());
-          }
+        // check angular and translational thresholds
+        if (it->updateNeeded())
+        {
+          transform.header.stamp = ros::Time::now();
+          transform.header.frame_id = it->getTargetFrame();
+          transform.child_frame_id = it->getSourceFrame();
 
-          // check angular and translational thresholds
-          if (it->updateNeeded())
-          {
-            transform.header.stamp = ros::Time::now();
-            transform.header.frame_id = it->getTargetFrame();
-            transform.child_frame_id = it->getSourceFrame();
+          // notify tf_subscription that a network transmission has been triggered
+          it->transmissionTriggered();
 
-            // notify tf_subscription that a network transmission has been triggered
-            it->transmissionTriggered();
-
-            // add transform to the feedback
-            feedback.transforms.push_back(transform);
-          }
+          // add transform to the feedback
+          feedback.transforms.push_back(transform);
         }
       }
-
-      if (feedback.transforms.size() > 0)
-      {
-        // publish feedback
-        goal_info->handle.publishFeedback(feedback);
-        ROS_DEBUG("Client %d: TF feedback published:", goal_info->client_ID_);
-      } else
-      {
-        ROS_DEBUG("Client %d: No TF frame update needed:", goal_info->client_ID_);
-      }
     }
+
+    if (feedback.transforms.size() > 0)
+    {
+      // publish feedback
+      goal_info->handle.publishFeedback(feedback);
+      ROS_DEBUG("Client %d: TF feedback published:", goal_info->client_ID_);
+    }
+    else
+    {
+      ROS_DEBUG("Client %d: No TF frame update needed:", goal_info->client_ID_);
+    }
+  }
 };
 
 int main(int argc, char **argv)
 {
-ros::init(argc, argv, "tf2_web_republisher");
+  ros::init(argc, argv, "tf2_web_republisher");
 
-TFRepublisher tf2_web_republisher(ros::this_node::getName());
-ros::spin();
+  TFRepublisher tf2_web_republisher(ros::this_node::getName());
+  ros::spin();
 
-return 0;
+  return 0;
 }
