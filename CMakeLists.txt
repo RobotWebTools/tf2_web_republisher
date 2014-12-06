@@ -16,6 +16,16 @@ add_action_files(
   FILES TFSubscription.action
 )
 
+add_service_files(
+  DIRECTORY services
+  FILES RepublishTFs.srv
+)
+
+add_message_files(
+  DIRECTORY msg
+  FILES TFArray.msg
+)
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs geometry_msgs roscpp
