@@ -114,7 +114,7 @@ public:
   bool requestCB(Request& req, Response& res)
   {
     ROS_DEBUG("RepublishTF service request received");
-        // generate goal_info struct
+    // generate goal_info struct
     boost::shared_ptr<ClientGoalInfo> goal_info = boost::make_shared<ClientGoalInfo>();
     std::stringstream topicname;
     topicname << "tf_repub_" << client_ID_count_;
@@ -233,12 +233,12 @@ public:
           it->transmissionTriggered();
 
           // add transform to the array message
-          array_msg.data.push_back(transform);
+          array_msg.transforms.push_back(transform);
         }
       }
     }
 
-    if (array_msg.data.size() > 0)
+    if (array_msg.transforms.size() > 0)
     {
       // publish TFs
       goal_info->pub_.publish(array_msg);
