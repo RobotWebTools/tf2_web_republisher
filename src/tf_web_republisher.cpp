@@ -61,19 +61,19 @@ protected:
   ros::NodeHandle priv_nh_;
 
   ros::ServiceServer tf_republish_service_;
-  // struct that manages client goals
-  struct ClientGoalInfo
+  // struct that manages requests
+  struct RequestInfo
   {
     ros::Publisher pub_;
     std::vector<TFPair> tf_subscriptions_;
-    unsigned int client_ID_;
+    unsigned int request_ID_;
     ros::Timer timer_;
     ros::Duration unsub_timeout_;
     ros::Timer unsub_timer_;
   };
 
-  std::list<boost::shared_ptr<ClientGoalInfo> > active_goals_;
-  boost::mutex goals_mutex_;
+  std::list<boost::shared_ptr<RequestInfo> > active_requests_;
+  boost::mutex requests_mutex_;
 
   // tf2 buffer and transformer
 #if ROS_VERSION_MINOR < 10
@@ -85,7 +85,7 @@ protected:
 #endif
   boost::mutex tf_buffer_mutex_;
 
-  unsigned int client_ID_count_;
+  unsigned int request_ID_count_;
 
 public:
 
@@ -93,7 +93,7 @@ public:
     nh_(),
     priv_nh_("~"),
     tf_listener_(tf_buffer_),
-    client_ID_count_(0)
+    request_ID_count_(0)
   {
     tf_republish_service_ = nh_.advertiseService("republish_tfs",
                                                  &TFRepublisher::requestCB,
@@ -114,25 +114,27 @@ public:
   bool requestCB(Request& req, Response& res)
   {
     ROS_DEBUG("RepublishTF service request received");
-    // generate goal_info struct
-    boost::shared_ptr<ClientGoalInfo> goal_info = boost::make_shared<ClientGoalInfo>();
+    // generate request_info struct
+    boost::shared_ptr<RequestInfo> request_info = boost::make_shared<RequestInfo>();
+
     std::stringstream topicname;
-    topicname << "tf_repub_" << client_ID_count_;
-    goal_info->pub_ = priv_nh_.advertise<tf2_web_republisher::TFArray>(topicname.str(), 10, true);
-    goal_info->client_ID_ = client_ID_count_++;
-    goal_info->unsub_timeout_ = req.timeout;
-    goal_info->unsub_timer_ = nh_.createTimer(goal_info->unsub_timeout_,
-                                              boost::bind(&TFRepublisher::unadvertiseCB, this, goal_info, _1),
-                                              true); // only fire once
-    goal_info->timer_ = nh_.createTimer(ros::Duration(1.0 / req.rate),
-                                        boost::bind(&TFRepublisher::processGoal, this, goal_info, _1));
+    topicname << "tf_repub_" << request_ID_count_;
+
+    request_info->pub_ = priv_nh_.advertise<tf2_web_republisher::TFArray>(topicname.str(), 10, true);
+    request_info->request_ID_ = request_ID_count_++;
+    request_info->unsub_timeout_ = req.timeout;
+    request_info->unsub_timer_ = nh_.createTimer(request_info->unsub_timeout_,
+                                                 boost::bind(&TFRepublisher::unadvertiseCB, this, request_info, _1),
+                                                 true); // only fire once
+    request_info->timer_ = nh_.createTimer(ros::Duration(1.0 / req.rate),
+                                           boost::bind(&TFRepublisher::processRequest, this, request_info, _1));
 
     std::size_t request_size_ = req.source_frames.size();
-    goal_info->tf_subscriptions_.resize(request_size_);
+    request_info->tf_subscriptions_.resize(request_size_);
 
     for (std::size_t i=0; i<request_size_; ++i )
     {
-      TFPair& tf_pair = goal_info->tf_subscriptions_[i];
+      TFPair& tf_pair = request_info->tf_subscriptions_[i];
 
       std::string source_frame = cleanTfFrame(req.source_frames[i]);
       std::string target_frame = cleanTfFrame(req.target_frame);
@@ -144,63 +146,57 @@ public:
     }
 
     {
-      boost::mutex::scoped_lock l(goals_mutex_);
-      // add new goal to list of active goals/clients
-      active_goals_.push_back(goal_info);
+      boost::mutex::scoped_lock l(requests_mutex_);
+      // add new request to list of active requests
+      active_requests_.push_back(request_info);
     }
-    res.topic_name = goal_info->pub_.getTopic();
+    res.topic_name = request_info->pub_.getTopic();
     ROS_INFO_STREAM("Publishing requested TFs on topic " << res.topic_name);
 
     return true;
   }
 
-  void unadvertiseCB(boost::shared_ptr<ClientGoalInfo> goal_info, const ros::TimerEvent&)
+  void unadvertiseCB(boost::shared_ptr<RequestInfo> request_info, const ros::TimerEvent&)
   {
-    ROS_INFO_STREAM("No subscribers on tf topic for client "
-                     << goal_info->client_ID_
-                     << " for " << goal_info->unsub_timeout_.toSec()
+    ROS_INFO_STREAM("No subscribers on tf topic for request "
+                     << request_info->request_ID_
+                     << " for " << request_info->unsub_timeout_.toSec()
                      << " seconds. Unadvertising topic:"
-                     << goal_info->pub_.getTopic());
-    goal_info->pub_.shutdown();
-    goal_info->unsub_timer_.stop();
-    goal_info->timer_.stop();
+                     << request_info->pub_.getTopic());
+    request_info->pub_.shutdown();
+    request_info->unsub_timer_.stop();
+    request_info->timer_.stop();
 
-    // search for goal handle and remove it from active_goals_ list
-    for(std::list<boost::shared_ptr<ClientGoalInfo> >::iterator it = active_goals_.begin(); it != active_goals_.end(); ++it)
+    // search for RequestInfo struct and remove it from active_requests_ list
+    for(std::list<boost::shared_ptr<RequestInfo> >::iterator it = active_requests_.begin(); it != active_requests_.end(); ++it)
     {
-      ClientGoalInfo& info = **it;
-      if(info.pub_ == goal_info->pub_)
+      RequestInfo& info = **it;
+      if(info.pub_ == request_info->pub_)
       {
-        active_goals_.erase(it);
+        active_requests_.erase(it);
         return;
       }
     }
   }
 
-  void processGoal(boost::shared_ptr<ClientGoalInfo> goal_info, const ros::TimerEvent& )
+  void processRequest(boost::shared_ptr<RequestInfo> request_info, const ros::TimerEvent& )
   {
-    ROS_DEBUG_STREAM("Topic " << goal_info->pub_.getTopic()
-              << " has " << goal_info->pub_.getNumSubscribers()
-              << " subscribers.");
-    if (goal_info->pub_.getNumSubscribers() == 0)
+    if (request_info->pub_.getNumSubscribers() == 0)
     {
-      ROS_DEBUG_STREAM("Starting unsub timer for client " << goal_info->client_ID_
-                       << ", will fire in " << goal_info->unsub_timeout_.toSec() << "seconds.");
-      goal_info->unsub_timer_.start();
+      request_info->unsub_timer_.start();
     }
     else
     {
-      // ROS_DEBUG_STREAM("Stopping unsub timer for client " << goal_info->client_ID_);
-      goal_info->unsub_timer_.stop();
+      request_info->unsub_timer_.stop();
     }
 
     tf2_web_republisher::TFArray array_msg;
     {
       // iterate over tf_subscription map
       std::vector<TFPair>::iterator it ;
-      std::vector<TFPair>::const_iterator end = goal_info->tf_subscriptions_.end();
+      std::vector<TFPair>::const_iterator end = request_info->tf_subscriptions_.end();
 
-      for (it=goal_info->tf_subscriptions_.begin(); it!=end; ++it)
+      for (it=request_info->tf_subscriptions_.begin(); it!=end; ++it)
       {
         geometry_msgs::TransformStamped transform;
 
@@ -241,12 +237,12 @@ public:
     if (array_msg.transforms.size() > 0)
     {
       // publish TFs
-      goal_info->pub_.publish(array_msg);
-      ROS_DEBUG("Client %d: TFs published:", goal_info->client_ID_);
+      request_info->pub_.publish(array_msg);
+      ROS_DEBUG("Request %d: TFs published:", request_info->request_ID_);
     }
     else
     {
-      ROS_DEBUG("Client %d: No TF frame update needed:", goal_info->client_ID_);
+      ROS_DEBUG("Request %d: No TF frame update needed:", request_info->request_ID_);
     }
   }
 };
