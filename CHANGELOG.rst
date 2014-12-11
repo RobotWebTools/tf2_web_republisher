@@ -2,7 +2,7 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.3 (2014-12-11)
+0.3.0 (2014-12-11)
 ------------------
 * Merge pull request #16 from T045T/tf2_republisher_service
   Tf2 republisher service
