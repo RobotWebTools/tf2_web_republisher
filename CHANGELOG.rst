@@ -2,6 +2,21 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.3 (2014-12-11)
+------------------
+* Merge pull request #16 from T045T/tf2_republisher_service
+  Tf2 republisher service
+* add back action server functionality
+* modularize code that can be used by both the action and service implementation
+* remove test folder
+* change terminology to reflect the fact that this is now a service, rather than an Action server
+  also remove some high-frequency debug output
+* change TFArray member name from data to transforms
+* change tf2_web_republisher to use a service and dynamically advertised topics instead of an action call
+  TODO: testing
+* consistent 2 space indentation
+* Contributors: Nils Berg, Russell Toris
+
 0.2.2 (2014-08-15)
 ------------------
 * release prepare
