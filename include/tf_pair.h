@@ -44,7 +44,11 @@ class TFPair
 public:
 
   TFPair() :
-       angular_thres_(0.0f), trans_thres_(0.0f), updated_(false), first_transmission_(true)
+    is_okay(true),
+    angular_thres_(0.0f),
+    trans_thres_(0.0f),
+    updated_(false),
+    first_transmission_(true)
   {
   }
 
