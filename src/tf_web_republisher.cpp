@@ -307,12 +307,29 @@ public:
                                                it->getSourceFrame(),
                                                ros::Time(0));
 
+        // If the transform broke earlier, but worked now (we didn't get
+        // booted into the catch block), tell the user all is well again
+        if (!it->is_okay)
+        {
+          it->is_okay = true;
+          ROS_INFO_STREAM("Transform from "
+                          << it->getSourceFrame()
+                          << " to "
+                          << it->getTargetFrame()
+                          << " is working again at time "
+                          << transform.header.stamp.toSec());
+        }
         // update tf_pair with transformtion
         it->updateTransform(transform);
       }
       catch (tf2::TransformException ex)
       {
-        ROS_ERROR("%s", ex.what());
+        // Only log an error if the transform was okay before
+        if (it->is_okay)
+        {
+          it->is_okay = false;
+          ROS_ERROR("%s", ex.what());
+        }
       }
 
       // check angular and translational thresholds
