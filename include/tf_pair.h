@@ -44,7 +44,11 @@ class TFPair
 public:
 
   TFPair() :
-       angular_thres_(0.0f), trans_thres_(0.0f), updated_(false), first_transmission_(true)
+    is_okay(true),
+    angular_thres_(0.0f),
+    trans_thres_(0.0f),
+    updated_(false),
+    first_transmission_(true)
   {
   }
 
@@ -52,6 +56,7 @@ public:
          const std::string& target_frame,
          float angular_thres = 0.0f,
          float trans_thres = 0.0f) :
+      is_okay(true),
       source_frame_(source_frame),
       target_frame_(target_frame),
       angular_thres_(angular_thres),
@@ -146,7 +151,9 @@ public:
     return source_frame_+"-"+target_frame_;
   }
 
-
+public:
+  bool is_okay; //!< save whether this transform is okay, so we can print only a single message
+                //!< if a transform breaks/starts working again
 private:
   std::string source_frame_;
   std::string target_frame_;
