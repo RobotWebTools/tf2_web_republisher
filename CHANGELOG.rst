@@ -2,8 +2,8 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2017-03-01)
+------------------
 * Merge pull request `#17 <https://github.com/RobotWebTools/tf2_web_republisher/issues/17>`_ from T045T/develop
   Only log errors for the first exception on each source/target pair
 * set is_okay in TFPair default c'tor

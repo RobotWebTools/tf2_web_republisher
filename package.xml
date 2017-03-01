@@ -1,6 +1,6 @@
 <package>
   <name>tf2_web_republisher</name>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <description>Republishing of Selected TFs</description>
 
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
