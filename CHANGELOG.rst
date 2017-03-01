@@ -2,6 +2,14 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#17 <https://github.com/RobotWebTools/tf2_web_republisher/issues/17>`_ from T045T/develop
+  Only log errors for the first exception on each source/target pair
+* set is_okay in TFPair default c'tor
+* don't log every exception, but only changes in state for each pair of source and target frame
+* Contributors: Nils Berg, Russell Toris
+
 0.3.0 (2014-12-11)
 ------------------
 * Merge pull request #16 from T045T/tf2_republisher_service
