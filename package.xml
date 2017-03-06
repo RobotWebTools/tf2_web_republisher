@@ -28,4 +28,5 @@
   <run_depend>roscpp</run_depend>
   <run_depend>tf2_ros</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>message_runtime</run_depend>
 </package>
