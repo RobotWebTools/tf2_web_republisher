@@ -134,7 +134,7 @@ public:
 
 
 
-  void cancelCB(GoalHandle& gh)
+  void cancelCB(GoalHandle gh)
   {
     boost::mutex::scoped_lock l(goals_mutex_);
 
@@ -192,7 +192,7 @@ public:
     }
   }
 
-  void goalCB(GoalHandle& gh)
+  void goalCB(GoalHandle gh)
   {
     ROS_DEBUG("GoalHandle request received");
 
