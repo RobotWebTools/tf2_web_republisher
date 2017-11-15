@@ -74,3 +74,11 @@ install(DIRECTORY include/
    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
 
+#############
+## Rostest ##
+#############
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+
+  add_rostest(test/test_tf2_web_republisher.test)
+endif()
