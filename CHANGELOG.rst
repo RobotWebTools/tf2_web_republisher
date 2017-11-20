@@ -2,8 +2,8 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2017-11-20)
+------------------
 * Merge pull request `#25 <https://github.com/RobotWebTools/tf2_web_republisher/issues/25>`_ from VictorLamoine/develop
   Fix compilation with c++11
 * add rostest
