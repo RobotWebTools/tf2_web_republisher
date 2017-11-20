@@ -2,6 +2,16 @@
 Changelog for package tf2_web_republisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#25 <https://github.com/RobotWebTools/tf2_web_republisher/issues/25>`_ from VictorLamoine/develop
+  Fix compilation with c++11
+* add rostest
+* Update travis configuration to test against kinetic (`#24 <https://github.com/RobotWebTools/tf2_web_republisher/issues/24>`_)
+* Merge pull request `#22 <https://github.com/RobotWebTools/tf2_web_republisher/issues/22>`_ from daniel86/develop
+  Added dependency to message_generation and message_runtime
+* Contributors: Daniel Bessler, Jihoon Lee, Nils Berg, Victor Lamoine
+
 0.3.1 (2017-03-01)
 ------------------
 * Merge pull request `#17 <https://github.com/RobotWebTools/tf2_web_republisher/issues/17>`_ from T045T/develop
