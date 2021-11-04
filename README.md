@@ -1,6 +1,8 @@
 tf2_web_republisher [![Build Status](https://api.travis-ci.org/RobotWebTools/tf2_web_republisher.png)](https://travis-ci.org/RobotWebTools/tf2_web_republisher)
 ===================
 
+**Status**: This project is not maintained (see [#34](https://github.com/RobotWebTools/tf2_web_republisher/issues/34))
+
 #### Republishing of Selected TFs
 For full documentation, see [the ROS wiki](http://ros.org/wiki/tf2_web_republisher).
 
