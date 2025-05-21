@@ -131,7 +131,7 @@ void TFRepublisher::execute(
     }
     // publish feedback
     goal_handle->publish_feedback(feedback);
-    rclcpp::sleep_for(std::chrono::nanoseconds((size_t)(1E9 / goal_handle->get_goal()->rate)));
+    rclcpp::sleep_for(std::chrono::nanoseconds(static_cast<size_t>(1E9 / goal_handle->get_goal()->rate)));
   }
 
   goal_handle->succeed(std::make_shared<tf2_web_republisher_msgs::action::TFSubscription::Result>());
