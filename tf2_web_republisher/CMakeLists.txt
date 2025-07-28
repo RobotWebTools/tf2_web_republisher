@@ -25,7 +25,18 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(tf2_web_republisher PUBLIC
+  ${builtin_interfaces_TARGETS}
+  ${tf2_msgs_TARGETS}
+  ${tf2_web_republisher_msgs_TARGETS}
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  tf2::tf2
+  tf2_eigen::tf2_eigen
+  tf2_geometry_msgs::tf2_geometry_msgs
+  tf2_ros::static_transform_broadcaster_node
+  tf2_ros::tf2_ros
+)
 
 add_executable(tf2_web_republisher_node src/tf2_web_republisher_node.cpp)
 target_link_libraries(tf2_web_republisher_node tf2_web_republisher)
