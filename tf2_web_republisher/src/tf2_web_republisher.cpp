@@ -61,7 +61,7 @@ TFRepublisher::TFRepublisher(const rclcpp::NodeOptions& options) : Node("tf2_web
       [this](auto&& PH1) { return handle_cancel(std::forward<decltype(PH1)>(PH1)); },
       [this](auto&& PH1) { handle_accepted(std::forward<decltype(PH1)>(PH1)); });
 
-  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
@@ -92,7 +92,7 @@ std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::thread_safe_l
   }
   catch (const tf2::TransformException& ex)
   {
-    RCLCPP_INFO(this->get_logger(), "Could not transform %s to %s: %s", target_frame.c_str(), source_frame.c_str(),
+    RCLCPP_INFO(get_logger(), "Could not transform %s to %s: %s", target_frame.c_str(), source_frame.c_str(),
                 ex.what());
   }
 
