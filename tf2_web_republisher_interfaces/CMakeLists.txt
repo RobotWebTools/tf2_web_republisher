@@ -9,7 +9,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(
   ${PROJECT_NAME}
   msg/TFArray.msg
-  services/RepublishTFs.srv
+  srv/RepublishTFs.srv
   action/TFSubscription.action
   DEPENDENCIES builtin_interfaces geometry_msgs
 )
