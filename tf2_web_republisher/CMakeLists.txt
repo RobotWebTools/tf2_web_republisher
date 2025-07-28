@@ -17,7 +17,9 @@ foreach(package IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${package} REQUIRED)
 endforeach()
 
-add_library(${PROJECT_NAME} src/tf2_web_republisher.cpp)
+add_library(${PROJECT_NAME} SHARED
+  src/tf2_web_republisher.cpp
+)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
