@@ -32,9 +32,9 @@ public:
   std::optional<geometry_msgs::msg::TransformStamped> thread_safe_lookup(const std::string& target_frame,
                                                                          const std::string& source_frame);
 
-  rclcpp_action::GoalResponse
-  handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
-              const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/);
+  rclcpp_action::GoalResponse handle_goal(
+      const rclcpp_action::GoalUUID& /*uuid*/,
+      const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/);
 
   void handle_accepted(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>&
