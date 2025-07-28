@@ -4,7 +4,7 @@
 
 namespace
 {
-using GoalHandle = rclcpp_action::ClientGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>;
+using GoalHandle = rclcpp_action::ClientGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>;
 
 class TFRepublisherTest : public TFRepublisher
 {
@@ -28,7 +28,7 @@ public:
 
   void
   feedback_callback(const GoalHandle::SharedPtr& gh,
-                    const std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Feedback>& feedback)
+                    const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Feedback>& feedback)
   {
     feedback_received = true;
     feedback_msg = feedback;
@@ -39,7 +39,7 @@ public:
     result_received = true;
   }
 
-  std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Feedback> feedback_msg;
+  std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Feedback> feedback_msg;
   std::atomic<bool> feedback_received = false;
   std::atomic<bool> result_received = false;
 };
@@ -73,28 +73,28 @@ TEST(TFWebRepublisher, TestActionCall)
   tf_buffer->setTransform(tf_msg_2, "default_authority", false);
 
   // create action client and test for server availability
-  auto client_ptr = rclcpp_action::create_client<tf2_web_republisher_msgs::action::TFSubscription>(
+  auto client_ptr = rclcpp_action::create_client<tf2_web_republisher_interfaces::action::TFSubscription>(
       tf2_web_republisher, "tf2_web_republisher");
   EXPECT_TRUE(client_ptr->wait_for_action_server()) << "Action server not available after waiting";
 
   // setup goal message
-  auto goal_msg = tf2_web_republisher_msgs::action::TFSubscription::Goal();
+  auto goal_msg = tf2_web_republisher_interfaces::action::TFSubscription::Goal();
   goal_msg.source_frames = { "/frame_1" };
   goal_msg.target_frame = "/frame_2";
   goal_msg.rate = 10;
 
   // setup callbacks
-  auto send_goal_options = rclcpp_action::Client<tf2_web_republisher_msgs::action::TFSubscription>::SendGoalOptions();
+  auto send_goal_options = rclcpp_action::Client<tf2_web_republisher_interfaces::action::TFSubscription>::SendGoalOptions();
   send_goal_options.goal_response_callback =
       std::function<void(GoalHandle::SharedPtr)>([&tf2_web_republisher](const GoalHandle::SharedPtr& future) {
         tf2_web_republisher->goal_response_callback(future);
       });
   send_goal_options.feedback_callback = std::function<void(
       GoalHandle::SharedPtr,
-      const std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Feedback> feedback)>(
+      const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Feedback> feedback)>(
       [&tf2_web_republisher](
           const GoalHandle::SharedPtr& gh,
-          const std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Feedback>& feedback) {
+          const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Feedback>& feedback) {
         tf2_web_republisher->feedback_callback(gh, feedback);
       });
   send_goal_options.result_callback = std::function<void(const GoalHandle::WrappedResult&)>(

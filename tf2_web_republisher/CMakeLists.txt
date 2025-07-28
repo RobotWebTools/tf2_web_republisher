@@ -13,7 +13,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     tf2_geometry_msgs
     tf2_msgs
     tf2_ros
-    tf2_web_republisher_msgs)
+    tf2_web_republisher_interfaces)
 
 foreach(package IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${package} REQUIRED)
@@ -28,7 +28,7 @@ target_include_directories(
 target_link_libraries(tf2_web_republisher PUBLIC
   ${builtin_interfaces_TARGETS}
   ${tf2_msgs_TARGETS}
-  ${tf2_web_republisher_msgs_TARGETS}
+  ${tf2_web_republisher_interfaces_TARGETS}
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
   tf2::tf2

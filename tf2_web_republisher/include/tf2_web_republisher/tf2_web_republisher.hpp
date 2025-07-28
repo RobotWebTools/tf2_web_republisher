@@ -10,8 +10,8 @@
 #include "tf2/transform_datatypes.hpp"
 #include "tf2_ros/buffer.hpp"
 #include "tf2_ros/transform_listener.hpp"
-#include "tf2_web_republisher_msgs/action/tf_subscription.hpp"
-#include "tf2_web_republisher_msgs/srv/republish_t_fs.hpp"
+#include "tf2_web_republisher_interfaces/action/tf_subscription.hpp"
+#include "tf2_web_republisher_interfaces/srv/republish_t_fs.hpp"
 
 class TFRepublisher : public rclcpp::Node
 {
@@ -22,7 +22,7 @@ public:
   ~TFRepublisher() override = default;
 
   rclcpp_action::CancelResponse handle_cancel(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>> /*gh*/);
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/);
 
   std::string cleanTfFrame(const std::string& frame_id) const;
 
@@ -31,20 +31,20 @@ public:
 
   rclcpp_action::GoalResponse
   handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
-              const std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Goal>& /*goal*/);
+              const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/);
 
   void handle_accepted(
-      const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>>&
+      const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>&
           goal_handle);
 
-  void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>>&
+  void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>&
                    goal_handle);
 
 protected:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 
 private:
-  rclcpp_action::Server<tf2_web_republisher_msgs::action::TFSubscription>::SharedPtr action_server_;
+  rclcpp_action::Server<tf2_web_republisher_interfaces::action::TFSubscription>::SharedPtr action_server_;
   std::mutex tf_buffer_mutex_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_{ nullptr };
 };

@@ -42,15 +42,15 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "tf2/transform_datatypes.hpp"
 #include "tf2_ros/buffer.hpp"
-#include "tf2_web_republisher_msgs/action/tf_subscription.hpp"
-#include "tf2_web_republisher_msgs/srv/republish_t_fs.hpp"
+#include "tf2_web_republisher_interfaces/action/tf_subscription.hpp"
+#include "tf2_web_republisher_interfaces/srv/republish_t_fs.hpp"
 #include "tf2_ros/transform_listener.hpp"
 
 TFRepublisher::TFRepublisher(const std::string& name, const rclcpp::NodeOptions& options) : Node(name, options)
 {
   using namespace std::placeholders;
 
-  action_server_ = rclcpp_action::create_server<tf2_web_republisher_msgs::action::TFSubscription>(
+  action_server_ = rclcpp_action::create_server<tf2_web_republisher_interfaces::action::TFSubscription>(
       this, "tf2_web_republisher",
       [this](auto&& PH1, auto&& PH2) {
         return handle_goal(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
@@ -63,7 +63,7 @@ TFRepublisher::TFRepublisher(const std::string& name, const rclcpp::NodeOptions&
 }
 
 rclcpp_action::CancelResponse TFRepublisher::handle_cancel(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>> /*gh*/)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/)
 {
   RCLCPP_DEBUG(rclcpp::get_logger("tf2_web_republisher"), "GoalHandle canceled");
   return rclcpp_action::CancelResponse::ACCEPT;
@@ -98,14 +98,14 @@ std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::threadSafeLoo
 
 rclcpp_action::GoalResponse
 TFRepublisher::handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
-                           const std::shared_ptr<const tf2_web_republisher_msgs::action::TFSubscription::Goal>& /*goal*/)
+                           const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/)
 {
   RCLCPP_DEBUG(rclcpp::get_logger("tf2_web_republisher"), "GoalHandle request received");
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
 void TFRepublisher::handle_accepted(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>>& goal_handle)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>& goal_handle)
 {
   using namespace std::placeholders;
   // this needs to return quickly to avoid blocking the executor, so spin up a new thread
@@ -113,9 +113,9 @@ void TFRepublisher::handle_accepted(
 }
 
 void TFRepublisher::execute(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_msgs::action::TFSubscription>>& goal_handle)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>& goal_handle)
 {
-  auto feedback = std::make_shared<tf2_web_republisher_msgs::action::TFSubscription::Feedback>();
+  auto feedback = std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Feedback>();
 
   std::string target_frame = goal_handle->get_goal()->target_frame;
   feedback->transforms.reserve(goal_handle->get_goal()->source_frames.size());
@@ -134,5 +134,5 @@ void TFRepublisher::execute(
     rclcpp::sleep_for(std::chrono::nanoseconds(static_cast<size_t>(1E9 / goal_handle->get_goal()->rate)));
   }
 
-  goal_handle->succeed(std::make_shared<tf2_web_republisher_msgs::action::TFSubscription::Result>());
+  goal_handle->succeed(std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Result>());
 }

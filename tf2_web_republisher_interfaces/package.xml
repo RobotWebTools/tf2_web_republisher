@@ -1,5 +1,5 @@
 <package format="3">
-  <name>tf2_web_republisher_msgs</name>
+  <name>tf2_web_republisher_interfaces</name>
   <version>1.0.0</version>
   <description>Messages for tf2_web_republisher</description>
   <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>

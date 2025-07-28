@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(tf2_web_republisher_msgs)
+project(tf2_web_republisher_interfaces)
 
 find_package(ament_cmake REQUIRED)
 
