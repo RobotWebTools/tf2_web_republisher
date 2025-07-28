@@ -12,8 +12,6 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>actionlib_msgs</depend>
-  <depend>eigen3_cmake_module</depend>
   <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
