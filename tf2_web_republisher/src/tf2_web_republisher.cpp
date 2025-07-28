@@ -101,9 +101,28 @@ std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::thread_safe_l
 
 rclcpp_action::GoalResponse
 TFRepublisher::handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
-                           const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/)
+                           const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& goal)
 {
   RCLCPP_DEBUG(get_logger(), "GoalHandle request received");
+
+  if (goal->rate <= 0.0)
+  {
+    RCLCPP_ERROR(get_logger(), "Goal rate must be greater than zero");
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+
+  if (goal->source_frames.empty())
+  {
+    RCLCPP_ERROR(get_logger(), "Goal source frames must not be empty");
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+
+  if (goal->target_frame.empty())
+  {
+    RCLCPP_ERROR(get_logger(), "Goal target frame must not be empty");
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
