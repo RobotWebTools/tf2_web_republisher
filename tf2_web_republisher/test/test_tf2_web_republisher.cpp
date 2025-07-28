@@ -4,6 +4,7 @@
 
 namespace
 {
+using tf2_web_republisher::TFRepublisher;
 using GoalHandle = rclcpp_action::ClientGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>;
 
 class TFRepublisherTest : public TFRepublisher
@@ -47,7 +48,7 @@ public:
 TEST(TFWebRepublisher, TestActionCall)
 {
   // create ROS thread
-  auto tf2_web_republisher = std::make_shared<TFRepublisherTest>("tf2_web_republisher");
+  auto tf2_web_republisher = std::make_shared<TFRepublisherTest>();
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(tf2_web_republisher);
   std::thread ros_thread([&executor]() { executor.spin(); });

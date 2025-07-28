@@ -7,6 +7,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   geometry_msgs
   rclcpp
   rclcpp_action
+  rclcpp_components
   tf2
   tf2_ros
   tf2_web_republisher_interfaces
@@ -28,21 +29,19 @@ target_link_libraries(tf2_web_republisher PUBLIC
   ${tf2_web_republisher_interfaces_TARGETS}
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
+  rclcpp_components::component
   tf2::tf2
   tf2_ros::tf2_ros
 )
 
-add_executable(tf2_web_republisher_node src/tf2_web_republisher_node.cpp)
-target_link_libraries(tf2_web_republisher_node tf2_web_republisher)
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "tf2_web_republisher::TFRepublisher"
+  EXECUTABLE tf2_web_republisher_node
+)
 
 if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
-
-install(
-  TARGETS tf2_web_republisher_node
-  EXPORT export_test_tf2_web_republisher_node
-  RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/ DESTINATION include)
 install(TARGETS ${PROJECT_NAME}

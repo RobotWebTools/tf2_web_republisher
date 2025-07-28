@@ -13,11 +13,14 @@
 #include "tf2_web_republisher_interfaces/action/tf_subscription.hpp"
 #include "tf2_web_republisher_interfaces/srv/republish_t_fs.hpp"
 
+namespace tf2_web_republisher
+{
+
 class TFRepublisher : public rclcpp::Node
 {
 protected:
 public:
-  explicit TFRepublisher(const std::string& name, const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  explicit TFRepublisher(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
   ~TFRepublisher() override = default;
 
@@ -48,3 +51,5 @@ private:
   std::mutex tf_buffer_mutex_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_{ nullptr };
 };
+
+}  // namespace tf2_web_republisher

@@ -46,7 +46,10 @@
 #include "tf2_web_republisher_interfaces/srv/republish_t_fs.hpp"
 #include "tf2_ros/transform_listener.hpp"
 
-TFRepublisher::TFRepublisher(const std::string& name, const rclcpp::NodeOptions& options) : Node(name, options)
+namespace tf2_web_republisher
+{
+
+TFRepublisher::TFRepublisher(const rclcpp::NodeOptions& options) : Node("tf2_web_republisher", options)
 {
   using namespace std::placeholders;
 
@@ -136,3 +139,8 @@ void TFRepublisher::execute(
 
   goal_handle->succeed(std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Result>());
 }
+
+}  // namespace tf2_web_republisher
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(tf2_web_republisher::TFRepublisher)
