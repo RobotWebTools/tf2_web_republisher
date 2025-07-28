@@ -30,7 +30,9 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
 
- *  Author: Julius Kammerl (jkammerl@willowgarage.com)
+ *  Authors: Julius Kammerl (jkammerl@willowgarage.com)
+ *           Paul Gesel (paul.gesel@picknik.ai)
+ *           Błażej Sowa (blazej@fictionlab.pl)
  *
  */
 
