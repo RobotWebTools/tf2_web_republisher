@@ -122,6 +122,9 @@ void TFRepublisher::execute(
 
   std::string target_frame = goal_handle->get_goal()->target_frame;
   feedback->transforms.reserve(goal_handle->get_goal()->source_frames.size());
+
+  rclcpp::Rate rate(goal_handle->get_goal()->rate);
+
   while (!goal_handle->is_canceling())
   {
     feedback->transforms.resize(0);
@@ -134,7 +137,7 @@ void TFRepublisher::execute(
     }
     // publish feedback
     goal_handle->publish_feedback(feedback);
-    rclcpp::sleep_for(std::chrono::nanoseconds(static_cast<size_t>(1E9 / goal_handle->get_goal()->rate)));
+    rate.sleep();
   }
 
   goal_handle->succeed(std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Result>());
