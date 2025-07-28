@@ -68,7 +68,7 @@ TFRepublisher::TFRepublisher(const rclcpp::NodeOptions& options) : Node("tf2_web
 rclcpp_action::CancelResponse TFRepublisher::handle_cancel(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("tf2_web_republisher"), "GoalHandle canceled");
+  RCLCPP_DEBUG(get_logger(), "GoalHandle canceled");
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
@@ -103,7 +103,7 @@ rclcpp_action::GoalResponse
 TFRepublisher::handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
                            const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("tf2_web_republisher"), "GoalHandle request received");
+  RCLCPP_DEBUG(get_logger(), "GoalHandle request received");
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
