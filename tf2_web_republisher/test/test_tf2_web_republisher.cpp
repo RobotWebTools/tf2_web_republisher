@@ -10,13 +10,13 @@ using GoalHandle = rclcpp_action::ClientGoalHandle<tf2_web_republisher_interface
 class TFRepublisherTest : public TFRepublisher
 {
 public:
-  using TFRepublisher::cleanTfFrame;
+  using TFRepublisher::clean_tf_frame;
   using TFRepublisher::execute;
   using TFRepublisher::handle_accepted;
   using TFRepublisher::handle_cancel;
   using TFRepublisher::handle_goal;
   using TFRepublisher::TFRepublisher;
-  using TFRepublisher::threadSafeLookup;
+  using TFRepublisher::thread_safe_lookup;
 
   std::shared_ptr<tf2_ros::Buffer> get_tf_buffer()
   {

@@ -27,10 +27,10 @@ public:
   rclcpp_action::CancelResponse handle_cancel(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/);
 
-  std::string cleanTfFrame(const std::string& frame_id) const;
+  std::string clean_tf_frame(const std::string& frame_id) const;
 
-  std::optional<geometry_msgs::msg::TransformStamped> threadSafeLookup(const std::string& target_frame,
-                                                                       const std::string& source_frame);
+  std::optional<geometry_msgs::msg::TransformStamped> thread_safe_lookup(const std::string& target_frame,
+                                                                         const std::string& source_frame);
 
   rclcpp_action::GoalResponse
   handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,

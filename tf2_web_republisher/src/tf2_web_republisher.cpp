@@ -72,7 +72,7 @@ rclcpp_action::CancelResponse TFRepublisher::handle_cancel(
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-std::string TFRepublisher::cleanTfFrame(const std::string& frame_id) const
+std::string TFRepublisher::clean_tf_frame(const std::string& frame_id) const
 {
   if (frame_id[0] == '/')
   {
@@ -81,14 +81,14 @@ std::string TFRepublisher::cleanTfFrame(const std::string& frame_id) const
   return frame_id;
 }
 
-std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::threadSafeLookup(const std::string& target_frame,
+std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::thread_safe_lookup(const std::string& target_frame,
                                                                                     const std::string& source_frame)
 {
   std::scoped_lock<std::mutex> lock(tf_buffer_mutex_);
   std::optional<geometry_msgs::msg::TransformStamped> out;
   try
   {
-    out = tf_buffer_->lookupTransform(cleanTfFrame(target_frame), cleanTfFrame(source_frame), tf2::TimePointZero);
+    out = tf_buffer_->lookupTransform(clean_tf_frame(target_frame), clean_tf_frame(source_frame), tf2::TimePointZero);
   }
   catch (const tf2::TransformException& ex)
   {
@@ -127,7 +127,7 @@ void TFRepublisher::execute(
     feedback->transforms.resize(0);
     for (auto& source_frame : goal_handle->get_goal()->source_frames)
     {
-      if (auto transform = threadSafeLookup(target_frame, source_frame))
+      if (auto transform = thread_safe_lookup(target_frame, source_frame))
       {
         feedback->transforms.push_back(transform.value());
       }
