@@ -1,0 +1,32 @@
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ros: humble
+            os: ubuntu-22.04
+          - ros: jazzy
+            os: ubuntu-24.04
+          - ros: kilted
+            os: ubuntu-24.04
+          - ros: rolling
+            os: ubuntu-24.04
+
+    name: ROS 2 ${{ matrix.ros }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ros_ws/src
+
+      - uses: ros-tooling/setup-ros@v0.7
+
+      - uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          target-ros2-distro: ${{ matrix.ros }}
