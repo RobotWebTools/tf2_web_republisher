@@ -55,7 +55,7 @@ TFRepublisher::TFRepublisher(const rclcpp::NodeOptions& options) : Node("tf2_web
 {
   using namespace std::placeholders;
 
-  action_server_ = rclcpp_action::create_server<tf2_web_republisher_interfaces::action::TFSubscription>(
+  action_server_ = rclcpp_action::create_server<TFSubscriptionAction>(
       this, "tf2_web_republisher",
       [this](auto&& PH1, auto&& PH2) {
         return handle_goal(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
@@ -68,7 +68,7 @@ TFRepublisher::TFRepublisher(const rclcpp::NodeOptions& options) : Node("tf2_web
 }
 
 rclcpp_action::CancelResponse TFRepublisher::handle_cancel(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<TFSubscriptionAction>> /*gh*/)
 {
   RCLCPP_DEBUG(get_logger(), "GoalHandle canceled");
   return rclcpp_action::CancelResponse::ACCEPT;
@@ -83,11 +83,11 @@ std::string TFRepublisher::clean_tf_frame(const std::string& frame_id) const
   return frame_id;
 }
 
-std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::thread_safe_lookup(const std::string& target_frame,
-                                                                                    const std::string& source_frame)
+std::optional<TransformStampedMsg> TFRepublisher::thread_safe_lookup(const std::string& target_frame,
+                                                                     const std::string& source_frame)
 {
   std::scoped_lock<std::mutex> lock(tf_buffer_mutex_);
-  std::optional<geometry_msgs::msg::TransformStamped> out;
+  std::optional<TransformStampedMsg> out;
   try
   {
     out = tf_buffer_->lookupTransform(clean_tf_frame(target_frame), clean_tf_frame(source_frame), tf2::TimePointZero);
@@ -103,7 +103,7 @@ std::optional<geometry_msgs::msg::TransformStamped> TFRepublisher::thread_safe_l
 
 rclcpp_action::GoalResponse
 TFRepublisher::handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
-                           const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& goal)
+                           const std::shared_ptr<const TFSubscriptionAction::Goal>& goal)
 {
   RCLCPP_DEBUG(get_logger(), "GoalHandle request received");
 
@@ -129,7 +129,7 @@ TFRepublisher::handle_goal(const rclcpp_action::GoalUUID& /*uuid*/,
 }
 
 void TFRepublisher::handle_accepted(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>& goal_handle)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<TFSubscriptionAction>>& goal_handle)
 {
   using namespace std::placeholders;
   // this needs to return quickly to avoid blocking the executor, so spin up a new thread
@@ -137,9 +137,9 @@ void TFRepublisher::handle_accepted(
 }
 
 void TFRepublisher::execute(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>& goal_handle)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<TFSubscriptionAction>>& goal_handle)
 {
-  auto feedback = std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Feedback>();
+  auto feedback = std::make_shared<TFSubscriptionAction::Feedback>();
 
   std::string target_frame = goal_handle->get_goal()->target_frame;
   feedback->transforms.reserve(goal_handle->get_goal()->source_frames.size());
@@ -161,7 +161,7 @@ void TFRepublisher::execute(
     rate.sleep();
   }
 
-  goal_handle->succeed(std::make_shared<tf2_web_republisher_interfaces::action::TFSubscription::Result>());
+  goal_handle->succeed(std::make_shared<TFSubscriptionAction::Result>());
 }
 
 }  // namespace tf2_web_republisher
