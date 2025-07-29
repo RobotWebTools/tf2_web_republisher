@@ -62,22 +62,52 @@ public:
 
   ~TFRepublisher() override = default;
 
+  /**
+   * @brief Handle cancel request for action server
+   * @param gh Goal handle to be canceled
+   * @return Cancel response indicating acceptance or rejection
+   */
   rclcpp_action::CancelResponse handle_cancel(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> /*gh*/);
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>> gh);
 
+  /**
+   * @brief Clean TF frame name by removing leading slash if present
+   * @param frame_id Frame ID to clean
+   * @return Cleaned frame ID string
+   */
   std::string clean_tf_frame(const std::string& frame_id) const;
 
+  /**
+   * @brief Thread-safe lookup of transform between two frames
+   * @param target_frame Target frame for transformation
+   * @param source_frame Source frame for transformation
+   * @return Optional transform stamped message, empty if lookup fails
+   */
   std::optional<geometry_msgs::msg::TransformStamped> thread_safe_lookup(const std::string& target_frame,
                                                                          const std::string& source_frame);
 
+  /**
+   * @brief Handle incoming goal request for action server
+   * @param uuid Unique identifier for the goal
+   * @param goal Goal message containing subscription parameters
+   * @return Goal response indicating acceptance or rejection
+   */
   rclcpp_action::GoalResponse handle_goal(
       const rclcpp_action::GoalUUID& /*uuid*/,
-      const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& /*goal*/);
+      const std::shared_ptr<const tf2_web_republisher_interfaces::action::TFSubscription::Goal>& goal);
 
+  /**
+   * @brief Handle accepted goal by spawning execution thread
+   * @param goal_handle Goal handle for the accepted goal
+   */
   void handle_accepted(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>&
           goal_handle);
 
+  /**
+   * @brief Execute the TF subscription action in a separate thread
+   * @param goal_handle Goal handle containing subscription parameters
+   */
   void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<tf2_web_republisher_interfaces::action::TFSubscription>>&
                    goal_handle);
 
