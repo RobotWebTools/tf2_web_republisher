@@ -1,0 +1,4 @@
+find_package(ament_cmake_gmock REQUIRED)
+
+ament_add_gmock(test_tf_web_republisher test_tf2_web_republisher.cpp)
+target_link_libraries(test_tf_web_republisher tf2_web_republisher)

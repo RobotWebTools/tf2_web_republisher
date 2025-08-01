@@ -1,17 +1,37 @@
-tf2_web_republisher [![Build Status](https://api.travis-ci.org/RobotWebTools/tf2_web_republisher.png)](https://travis-ci.org/RobotWebTools/tf2_web_republisher)
+tf2_web_republisher 
 ===================
 
-**Status**: This project is not maintained (see [#34](https://github.com/RobotWebTools/tf2_web_republisher/issues/34))
+The tf2_web_republisher package can be used to throttle and precompute [tf transform] information to be sent via the [rosbridge_suite] to a [ros3djs] web client. The tf2_web_republisher is developed as part of the Robot Web Tools effort.
 
-#### Republishing of Selected TFs
-For full documentation, see [the ROS wiki](http://ros.org/wiki/tf2_web_republisher).
+## Action interface
+The ROS node starts a [ROS action](https://docs.ros.org/en/rolling/Concepts/About-Actionlib.html) server that allows clients to request transforms for a set of source frames relative to a target frame. The action server will compute the transforms at a specified rate and return them as feedback.
 
-[Doxygen](http://docs.ros.org/indigo/api/tf2_web_republisher/html/) files can be found on the ROS wiki.
+```
+# goal
+string[] source_frames
+string target_frame
+float32 angular_thres
+float32 trans_thres
+float32 rate
+---
+# result
+---
+# feedback
+geometry_msgs/TransformStamped[] transforms
+```
 
-This project is released as part of the [Robot Web Tools](http://robotwebtools.org/) effort.
+- `source_frames` - list of source TF frames to be transformed
+- `target_frame` - target TF frame to which the source frames are transformed
+- `angular_thres` - update threshold for angular changes in radians
+- `trans_thres` - update threshold for translational changes in meters
+- `rate` - maximum update rate of geometry_msgs/msg/TransformStamped messages on the feedback channel. Each feedback message contains a stamped transform for each specified source_frame.
 
-### License
+## License
 tf2_web_republisher is released with a BSD license. For full terms and conditions, see the [LICENSE](LICENSE) file.
 
-### Authors
+## Authors
 See the [AUTHORS](AUTHORS.md) file for a full list of contributors.
+
+[tf transform]: https://docs.ros.org/en/rolling/Concepts/Intermediate/About-Tf2.html#tf2
+[rosbridge_suite]: https://github.com/RobotWebTools/rosbridge_suite
+[ros3djs]: https://github.com/RobotWebTools/ros3djs
