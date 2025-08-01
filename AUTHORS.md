@@ -9,8 +9,8 @@ Contributors
  * Russell Toris (rctoris@wpi.edu)
  * William Woodall (wjwwood@gmail.com)
 
-ROS2 Port
----------
+ROS 2 Port
+----------
 
  * Paul Gesel (paul.gesel@picknik.ai)
  * Błażej Sowa (blazej@fictionlab.pl)
