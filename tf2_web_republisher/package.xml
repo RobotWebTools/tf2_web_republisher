@@ -8,7 +8,6 @@
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/tf2_web_republisher</url>
   <url type="bugtracker">https://github.com/RobotWebTools/tf2_web_republisher/issues</url>
   <url type="repository">https://github.com/RobotWebTools/tf2_web_republisher</url>
 
