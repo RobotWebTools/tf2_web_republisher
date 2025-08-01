@@ -4,13 +4,17 @@
   <name>tf2_web_republisher</name>
   <version>1.0.0</version>
   <description>Republishing of Selected TFs</description>
-  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+  <maintainer email="blazej@fictionlab.pl ">Błażej Sowa</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/tf2_web_republisher</url>
   <url type="bugtracker">https://github.com/RobotWebTools/tf2_web_republisher/issues</url>
   <url type="repository">https://github.com/RobotWebTools/tf2_web_republisher</url>
+
+  <author email="jkammerl@willowgarage.com">Julius Kammer</author>
+  <author email="paul.gesel@picknik.ai">Paul Gesel</author>
+  <author email="blazej@fictionlab.pl">Błażej Sowa</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
